@@ -4,6 +4,8 @@
 
 支持的平台：Codex、Cursor、Grok、ZenMux Subscription、Kimi Code，以及 Kimi 中国区/海外区开放平台余额。ZenMux 和 Kimi 开放平台余额使用官方接口；其余个人订阅用量接口可能随上游产品改版，界面会标记为 Beta。
 
+完整文档（本地入门、部署、适配器、API、安全与开发）见 [`docs/`](docs/README.md)。
+
 ## 技术栈
 
 - Cloudflare Workers、D1、Queues、Cron Triggers、Static Assets
