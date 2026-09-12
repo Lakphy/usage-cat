@@ -1,4 +1,4 @@
-import { Cat, Check, GithubLogo, Moon, Sun, Translate } from "@phosphor-icons/react";
+import { Cat, Check, Moon, Sun, Translate } from "@phosphor-icons/react";
 import { Link, Outlet } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { buttonVariants } from "@/components/ui/button";
@@ -46,9 +46,16 @@ export function AppShell() {
               {t("Dashboard", "公开看板")}
             </Link>
             <Link to="/admin" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
-              <GithubLogo data-icon="inline-start" />
               {t("Admin", "管理")}
             </Link>
+            <a
+              href="https://github.com/Lakphy/usage-cat"
+              target="_blank"
+              rel="noreferrer"
+              className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+            >
+              GitHub
+            </a>
             <DropdownMenu>
               <DropdownMenuTrigger
                 className={buttonVariants({ variant: "ghost", size: "sm" })}
