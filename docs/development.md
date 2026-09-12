@@ -18,7 +18,7 @@
 | `pnpm db:migrate:local` / `:remote` | 应用 D1 迁移 |
 | `pnpm run deploy` | build + `wrangler deploy` |
 
-CI（`.github/workflows/ci.yml`）在 `main` 和 PR 上跑：install → lint → typecheck → test → build → `wrangler deploy --dry-run`。
+质量检查在本地跑：`pnpm lint && pnpm typecheck && pnpm test && pnpm build`。仓库没有 GitHub Actions。
 
 ## 目录
 
