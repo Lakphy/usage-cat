@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { type PublicIntegration, providerSchema, snapshotPayloadSchema } from "@/shared/usage";
 import type { Env } from "@/worker/env";
 
@@ -26,6 +27,15 @@ function parseSnapshot(raw: string | null) {
 }
 
 export const publicRoutes = new Hono<{ Bindings: Env }>();
+
+publicRoutes.use(
+  "*",
+  cors({
+    origin: "*",
+    allowMethods: ["GET", "HEAD", "OPTIONS"],
+    allowHeaders: ["Content-Type"],
+  }),
+);
 
 publicRoutes.get("/dashboard", async (c) => {
   const result = await c.env.DB.prepare(

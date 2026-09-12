@@ -219,12 +219,24 @@ describe("公开 API", () => {
 
     const dashboard = await app.request(
       "http://example.com/api/v1/public/dashboard",
-      {},
+      { headers: { Origin: "https://other.example" } },
       env as never,
     );
     expect(dashboard.status).toBe(200);
+    expect(dashboard.headers.get("access-control-allow-origin")).toBe("*");
     const dashboardBody = (await dashboard.json()) as { data: Array<{ displayName: string }> };
     expect(dashboardBody.data[0].displayName).toBe("Kimi 主账号");
+
+    const preflight = await app.request(
+      "http://example.com/api/v1/public/dashboard",
+      {
+        method: "OPTIONS",
+        headers: { Origin: "https://other.example", "Access-Control-Request-Method": "GET" },
+      },
+      env as never,
+    );
+    expect(preflight.status).toBe(204);
+    expect(preflight.headers.get("access-control-allow-origin")).toBe("*");
 
     const snapshots = await app.request(
       "http://example.com/api/v1/public/integrations/kimi-1/snapshots",

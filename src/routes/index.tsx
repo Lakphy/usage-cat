@@ -1,6 +1,7 @@
 import { ChartLineUp, Database, Pulse } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { PublicApiDocs } from "@/components/public-api-docs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UsageCard } from "@/components/usage-card";
@@ -20,18 +21,12 @@ function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section className="grid gap-6 border-b pb-8 md:grid-cols-[1fr_auto] md:items-end">
+      <section className="grid gap-6 border-b pb-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div>
           <p className="mb-3 text-[10px] tracking-[0.24em] text-muted-foreground">
             PERSONAL AI USAGE MONITOR
           </p>
-          <h1
-            className={
-              locale === "en"
-                ? "max-w-none text-2xl font-semibold tracking-tight sm:text-3xl md:whitespace-nowrap lg:text-[1.875rem] xl:text-4xl"
-                : "max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl"
-            }
-          >
+          <h1 className="max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
             {t("Every AI subscription, at a glance.", "所有 AI 订阅，一眼看清。")}
           </h1>
           <p className="mt-3 max-w-xl text-sm/6 text-muted-foreground">
@@ -41,7 +36,7 @@ function DashboardPage() {
             )}
           </p>
         </div>
-        <div className="grid grid-cols-3 gap-px border bg-border text-center">
+        <div className="grid w-full grid-cols-3 gap-px border bg-border text-center lg:w-auto">
           <Stat
             icon={<Pulse />}
             value={query.data?.data.filter((item) => item.status === "healthy").length ?? 0}
@@ -89,6 +84,8 @@ function DashboardPage() {
           </div>
         </div>
       )}
+
+      <PublicApiDocs />
     </div>
   );
 }
@@ -103,11 +100,11 @@ function Stat({
   label: string;
 }) {
   return (
-    <div className="min-w-20 bg-background p-3">
+    <div className="min-w-24 bg-background px-4 py-3">
       <div className="mx-auto mb-1 flex items-center justify-center gap-1 text-sm tabular-nums">
         {icon} {value}
       </div>
-      <div className="text-[10px] text-muted-foreground">{label}</div>
+      <div className="whitespace-nowrap text-[10px] text-muted-foreground">{label}</div>
     </div>
   );
 }
