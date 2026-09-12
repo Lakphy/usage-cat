@@ -19,6 +19,7 @@ Usage Cat 是一个部署在 Cloudflare Workers 上的个人 AI 订阅用量看�
 | 了解加密、公开数据范围、上游协议风险 | [安全](security.md) |
 | 查同步、队列、Cron、免费套餐预算 | [运行与配额](operations.md) |
 | 改代码、跑测试、加适配器 | [开发](development.md) |
+| 用 macOS 状态栏看公开用量 | [菜单栏客户端](../client/macos/README.md) |
 
 仓库根目录的 [README](../README.md) 是短摘要；细节以本目录为准。
 

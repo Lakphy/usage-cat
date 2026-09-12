@@ -11,3 +11,5 @@ dist
 coverage
 *.tsbuildinfo
 worker-configuration.d.ts
+client/**/.build
+client/**/dist

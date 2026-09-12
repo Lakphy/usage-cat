@@ -39,6 +39,7 @@ tests/
   unit/                   # jsdom
   worker/                 # Miniflare + D1
 scripts/test-kimi-key.sh  # 交互诊断，不落盘
+client/macos/             # 原生菜单栏客户端（Swift / SwiftUI）
 ```
 
 `src/routeTree.gen.ts` 由路由插件生成，Biome 忽略它。

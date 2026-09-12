@@ -4,7 +4,7 @@
 
 支持的平台：Codex、Cursor、Grok、ZenMux Subscription、Kimi Code，以及 Kimi 中国区/海外区开放平台余额。ZenMux 和 Kimi 开放平台余额使用官方接口；其余个人订阅用量接口可能随上游产品改版，界面会标记为 Beta。
 
-完整文档（本地入门、部署、适配器、API、安全与开发）见 [`docs/`](docs/README.md)。
+完整文档（本地入门、部署、适配器、API、安全与开发）见 [`docs/`](docs/README.md)。macOS 状态栏客户端见 [`client/macos`](client/macos/README.md)。
 
 ## 技术栈
 
@@ -13,6 +13,16 @@
 - TanStack Router、TanStack Query、React Hook Form、Zod
 - Tailwind CSS v4、shadcn Lyra（默认中性色）、Recharts
 - Vitest（包括 Workers Runtime + D1 集成测试）、Biome
+
+## macOS 状态栏客户端
+
+`client/macos` 是原生 Swift 菜单栏小程序，填写公开看板地址后即可在右上角查看全部用量。
+
+```bash
+cd client/macos
+./scripts/build.sh
+open "dist/Usage Cat.app"
+```
 
 ## 本地开发
 
