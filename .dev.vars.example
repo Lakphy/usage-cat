@@ -1,0 +1,4 @@
+GITHUB_CLIENT_ID="github-oauth-client-id"
+GITHUB_CLIENT_SECRET="github-oauth-client-secret"
+ADMIN_GITHUB_IDS="12345678"
+CREDENTIAL_ENCRYPTION_KEY="base64-encoded-32-byte-key"

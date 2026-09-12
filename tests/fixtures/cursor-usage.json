@@ -1,0 +1,20 @@
+{
+  "billingCycleStart": "1700000000000",
+  "billingCycleEnd": "1702592000000",
+  "planUsage": {
+    "totalSpend": 4200,
+    "includedSpend": 4000,
+    "bonusSpend": 200,
+    "remaining": 5800,
+    "limit": 10000,
+    "autoSpend": 3000,
+    "apiSpend": 1200,
+    "autoLimit": 7000,
+    "apiLimit": 3000,
+    "autoPercentUsed": 35,
+    "apiPercentUsed": 53,
+    "totalPercentUsed": 37.2
+  },
+  "spendLimitUsage": { "limitType": "individual" },
+  "enabled": true
+}

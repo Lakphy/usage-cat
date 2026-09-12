@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en" data-usage-cat-locale="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta
+      name="description"
+      content="Usage Cat - Private AI subscription usage monitoring"
+    />
+    <title>Usage Cat</title>
+    <script>
+      (() => {
+        window.__USAGE_CAT_LOCALE__ = "en";
+        const theme = localStorage.getItem("usage-cat-theme");
+        document.documentElement.classList.toggle(
+          "dark",
+          theme === "dark" || (!theme && matchMedia("(prefers-color-scheme: dark)").matches),
+        );
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

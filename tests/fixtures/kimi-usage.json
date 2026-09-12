@@ -1,0 +1,28 @@
+{
+  "usage": {
+    "used": "40",
+    "limit": "1000",
+    "remaining": "960",
+    "resetTime": "2026-08-03T05:20:51Z"
+  },
+  "limits": [
+    {
+      "window": { "duration": 300, "timeUnit": "TIME_UNIT_MINUTE" },
+      "detail": {
+        "limit": "100",
+        "remaining": "99",
+        "resetTime": "2026-08-01T05:20:51Z"
+      }
+    }
+  ],
+  "boosterWallet": {
+    "balance": {
+      "type": "BOOSTER",
+      "amount": "20000000000",
+      "amountLeft": "10000000000"
+    },
+    "monthlyChargeLimitEnabled": true,
+    "monthlyChargeLimit": { "currency": "USD", "priceInCents": "20000" },
+    "monthlyUsed": { "currency": "USD", "priceInCents": "5000" }
+  }
+}

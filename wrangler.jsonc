@@ -1,0 +1,57 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "usage-cat",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-09-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/", "/admin", "/admin/*", "/login", "/login/*", "/providers/*", "/api/*"]
+  },
+  "browser": {
+    "binding": "BROWSER"
+  },
+  "routes": [
+    {
+      "pattern": "usage.lakphy.me",
+      "custom_domain": true
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "usage-cat",
+      "database_id": "a963eeee-4767-40ca-8242-cc8cccf51195",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "SYNC_QUEUE",
+        "queue": "usage-cat-sync"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "usage-cat-sync",
+        "max_batch_size": 1,
+        "max_batch_timeout": 1,
+        "max_retries": 5,
+        "max_concurrency": 1
+      }
+    ]
+  },
+  "triggers": {
+    "crons": ["*/5 * * * *", "17 19 * * *"]
+  },
+  "vars": {
+    "APP_URL": "https://usage.lakphy.me"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.05
+  }
+}
