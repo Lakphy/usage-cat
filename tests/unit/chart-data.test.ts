@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toChartData } from "@/lib/chart-data";
+import { mergeChartSeries, metricChartColor, toChartData } from "@/lib/chart-data";
 import { metricSummary } from "@/lib/format";
 import type { HistoryPoint, UsageMetric } from "@/shared/usage";
 
@@ -54,5 +54,37 @@ describe("折线图取数", () => {
       { capturedAt: 120, metric: metric({ kind: "billing_counter", used: 16 }) },
     ];
     expect(toChartData(points, true).map((point) => point.value)).toEqual([null, null]);
+  });
+
+  it("按时间对齐多条额度曲线并保留各自断点", () => {
+    const merged = mergeChartSeries([
+      {
+        key: "weekly",
+        points: [
+          { time: 100, value: 80, label: "a" },
+          { time: 129, value: null, label: "b" },
+          { time: 130, value: 20, label: "b" },
+        ],
+      },
+      {
+        key: "monthly",
+        points: [
+          { time: 100, value: 400, label: "a" },
+          { time: 160, value: 360, label: "c" },
+        ],
+      },
+    ]);
+    expect(merged).toEqual([
+      { time: 100, label: "a", weekly: 80, monthly: 400 },
+      { time: 129, label: "b", weekly: null, monthly: 400 - (40 * 29) / 60 },
+      { time: 130, label: "b", weekly: 20, monthly: 380 },
+      { time: 160, label: "c", monthly: 360 },
+    ]);
+  });
+
+  it("额度颜色按稳定序号循环分配", () => {
+    expect(metricChartColor(0)).toBe("var(--chart-1)");
+    expect(metricChartColor(8)).toBe("var(--chart-1)");
+    expect(metricChartColor(7)).toBe("var(--chart-8)");
   });
 });
