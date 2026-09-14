@@ -29,6 +29,10 @@ function interpolatedValue(points: ChartPoint[], time: number): number | undefin
   }
   if (previous?.value == null || next?.value == null) return undefined;
   if (previous.time === next.time) return previous.value;
+  if (next.value > previous.value) {
+    const span = Math.max(Math.abs(previous.value), 1e-6);
+    if (next.value - previous.value > span * 0.02) return previous.value;
+  }
   const ratio = (time - previous.time) / (next.time - previous.time);
   return previous.value + (next.value - previous.value) * ratio;
 }
@@ -120,6 +124,14 @@ function isQuotaWindowReset(previous: HistoryPoint, point: HistoryPoint): boolea
   return false;
 }
 
+function resetStepAt(previous: HistoryPoint, point: HistoryPoint): number {
+  const resetAt = previous.metric.resetAt;
+  if (resetAt !== undefined && resetAt > previous.capturedAt && resetAt < point.capturedAt) {
+    return resetAt;
+  }
+  return point.capturedAt - 1;
+}
+
 export function toChartData(
   points: HistoryPoint[],
   delta: boolean,
@@ -131,11 +143,15 @@ export function toChartData(
     const currentValue = chartValue(point.metric);
     if (currentValue === undefined) continue;
     if (previous && isQuotaWindowReset(previous, point)) {
-      rows.push({
-        time: point.capturedAt - 1,
-        value: null,
-        label: formatTime(point.capturedAt, locale),
-      });
+      const previousValue = chartValue(previous.metric);
+      if (previousValue !== undefined) {
+        const stepAt = resetStepAt(previous, point);
+        const label = formatTime(stepAt, locale);
+        rows.push({ time: stepAt, value: previousValue, label });
+        if (stepAt + 1 < point.capturedAt) {
+          rows.push({ time: stepAt + 1, value: currentValue, label });
+        }
+      }
     }
     let value: number | null = currentValue;
     if (delta) {

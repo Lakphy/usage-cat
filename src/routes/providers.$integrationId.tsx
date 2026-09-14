@@ -172,8 +172,8 @@ function ProviderDetailPage() {
           <CardTitle>{t("Usage history", "用量历史")}</CardTitle>
           <CardDescription>
             {t(
-              "All selected quotas share one chart. Colors distinguish each type; remaining-quota series only break when a window actually refills.",
-              "所选额度叠加在同一张折线图中，颜色区分类型。剩余额度只在窗口真正回补时断开。",
+              "All selected quotas share one chart. Colors distinguish each type; remaining-quota series step straight up when a window refills.",
+              "所选额度叠加在同一张折线图中，颜色区分类型。剩余额度在窗口回补时会竖线拉回。",
             )}
           </CardDescription>
         </CardHeader>
@@ -279,7 +279,7 @@ function ProviderDetailPage() {
                     key={metric.key}
                     dataKey={metric.key}
                     name={metric.key}
-                    type="monotone"
+                    type="linear"
                     stroke={`var(--color-${metric.key})`}
                     strokeWidth={2}
                     dot={false}

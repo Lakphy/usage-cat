@@ -8,12 +8,17 @@ function metric(overrides: Partial<UsageMetric>): UsageMetric {
 }
 
 describe("折线图取数", () => {
-  it("窗口真正回补时插入断点", () => {
+  it("窗口回补时在重置点竖线拉回", () => {
     const points: HistoryPoint[] = [
       { capturedAt: 100, metric: metric({ used: 80, percentage: 80, resetAt: 120 }) },
       { capturedAt: 130, metric: metric({ used: 5, percentage: 5, resetAt: 240 }) },
     ];
-    expect(toChartData(points, false).map((point) => point.value)).toEqual([20, null, 95]);
+    expect(toChartData(points, false).map(({ time, value }) => ({ time, value }))).toEqual([
+      { time: 100, value: 20 },
+      { time: 120, value: 20 },
+      { time: 121, value: 95 },
+      { time: 130, value: 95 },
+    ]);
   });
 
   it("resetAt 随采集时间滑动时不拆线", () => {
@@ -63,12 +68,17 @@ describe("折线图取数", () => {
     expect(toChartData(points, false).map((point) => point.value)).toEqual([49.97, 50]);
   });
 
-  it("漏采后窗口已过且额度回补时仍断开", () => {
+  it("漏采后窗口已过且额度回补时仍在重置点竖线拉回", () => {
     const points: HistoryPoint[] = [
       { capturedAt: 100, metric: metric({ used: 90, percentage: 90, resetAt: 18_100 }) },
       { capturedAt: 19_000, metric: metric({ used: 5, percentage: 5, resetAt: 37_000 }) },
     ];
-    expect(toChartData(points, false).map((point) => point.value)).toEqual([10, null, 95]);
+    expect(toChartData(points, false).map(({ time, value }) => ({ time, value }))).toEqual([
+      { time: 100, value: 10 },
+      { time: 18_100, value: 10 },
+      { time: 18_101, value: 95 },
+      { time: 19_000, value: 95 },
+    ]);
   });
 
   it("同一 periodStart 内剩余额度回升也不拆线", () => {
@@ -123,6 +133,34 @@ describe("折线图取数", () => {
       { capturedAt: 120, metric: metric({ kind: "billing_counter", used: 16 }) },
     ];
     expect(toChartData(points, true).map((point) => point.value)).toEqual([null, null]);
+  });
+
+  it("对齐多条曲线时回补前保持旧剩余额度", () => {
+    const merged = mergeChartSeries([
+      {
+        key: "fiveHour",
+        points: [
+          { time: 100, value: 0, label: "a" },
+          { time: 200, value: 0, label: "b" },
+          { time: 201, value: 100, label: "b" },
+        ],
+      },
+      {
+        key: "weekly",
+        points: [
+          { time: 100, value: 50, label: "a" },
+          { time: 150, value: 48, label: "c" },
+          { time: 250, value: 40, label: "d" },
+        ],
+      },
+    ]);
+    expect(merged).toEqual([
+      { time: 100, label: "a", fiveHour: 0, weekly: 50 },
+      { time: 150, label: "c", fiveHour: 0, weekly: 48 },
+      { time: 200, label: "b", fiveHour: 0, weekly: 44 },
+      { time: 201, label: "b", fiveHour: 100, weekly: 48 - (8 * 51) / 100 },
+      { time: 250, label: "d", weekly: 40 },
+    ]);
   });
 
   it("按时间对齐多条额度曲线并保留各自断点", () => {
