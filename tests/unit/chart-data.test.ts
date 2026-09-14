@@ -8,12 +8,81 @@ function metric(overrides: Partial<UsageMetric>): UsageMetric {
 }
 
 describe("折线图取数", () => {
-  it("窗口 resetAt 改变时插入断点", () => {
+  it("窗口真正回补时插入断点", () => {
     const points: HistoryPoint[] = [
       { capturedAt: 100, metric: metric({ used: 80, percentage: 80, resetAt: 120 }) },
       { capturedAt: 130, metric: metric({ used: 5, percentage: 5, resetAt: 240 }) },
     ];
     expect(toChartData(points, false).map((point) => point.value)).toEqual([20, null, 95]);
+  });
+
+  it("resetAt 随采集时间滑动时不拆线", () => {
+    const points: HistoryPoint[] = [
+      { capturedAt: 100, metric: metric({ used: 20, percentage: 20, resetAt: 18_100 }) },
+      { capturedAt: 1_000, metric: metric({ used: 35, percentage: 35, resetAt: 19_000 }) },
+      { capturedAt: 1_900, metric: metric({ used: 40, percentage: 40, resetAt: 19_900 }) },
+    ];
+    expect(toChartData(points, false).map((point) => point.value)).toEqual([80, 65, 60]);
+  });
+
+  it("resetAt 秒级抖动且额度未回补时不拆线", () => {
+    const points: HistoryPoint[] = [
+      { capturedAt: 100, metric: metric({ used: 20, percentage: 20, resetAt: 50_000 }) },
+      { capturedAt: 1_000, metric: metric({ used: 22, percentage: 22, resetAt: 50_001 }) },
+      { capturedAt: 1_900, metric: metric({ used: 25, percentage: 25, resetAt: 50_000 }) },
+    ];
+    expect(toChartData(points, false).map((point) => point.value)).toEqual([80, 78, 75]);
+  });
+
+  it("未使用窗口按期翻过但剩余额度几乎不变时不拆线", () => {
+    const points: HistoryPoint[] = [
+      { capturedAt: 100, metric: metric({ used: 0, percentage: 0, resetAt: 18_100 }) },
+      { capturedAt: 18_200, metric: metric({ used: 0, percentage: 0, resetAt: 36_200 }) },
+    ];
+    expect(toChartData(points, false).map((point) => point.value)).toEqual([100, 100]);
+  });
+
+  it("resetAt 消失但剩余额度只是噪声回升时不拆线", () => {
+    const points: HistoryPoint[] = [
+      {
+        capturedAt: 100,
+        metric: metric({
+          unit: "flow",
+          used: 0.03,
+          limit: 50,
+          remaining: 49.97,
+          percentage: 0.06,
+          resetAt: 200,
+        }),
+      },
+      {
+        capturedAt: 300,
+        metric: metric({ unit: "flow", used: 0, limit: 50, remaining: 50, percentage: 0 }),
+      },
+    ];
+    expect(toChartData(points, false).map((point) => point.value)).toEqual([49.97, 50]);
+  });
+
+  it("漏采后窗口已过且额度回补时仍断开", () => {
+    const points: HistoryPoint[] = [
+      { capturedAt: 100, metric: metric({ used: 90, percentage: 90, resetAt: 18_100 }) },
+      { capturedAt: 19_000, metric: metric({ used: 5, percentage: 5, resetAt: 37_000 }) },
+    ];
+    expect(toChartData(points, false).map((point) => point.value)).toEqual([10, null, 95]);
+  });
+
+  it("同一 periodStart 内剩余额度回升也不拆线", () => {
+    const points: HistoryPoint[] = [
+      {
+        capturedAt: 100,
+        metric: metric({ used: 40, percentage: 40, periodStart: 1, resetAt: 500 }),
+      },
+      {
+        capturedAt: 200,
+        metric: metric({ used: 10, percentage: 10, periodStart: 1, resetAt: 800 }),
+      },
+    ];
+    expect(toChartData(points, false).map((point) => point.value)).toEqual([60, 90]);
   });
 
   it("额度窗口优先绘制绝对剩余额度", () => {

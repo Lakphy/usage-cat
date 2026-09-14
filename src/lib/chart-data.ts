@@ -69,6 +69,57 @@ export function chartValue(metric: UsageMetric): number | undefined {
   return metric.percentage ?? metric.used ?? metric.value;
 }
 
+function quotaRefilled(previous: UsageMetric, current: UsageMetric): boolean {
+  const previousValue = chartValue(previous);
+  const currentValue = chartValue(current);
+  if (previousValue === undefined || currentValue === undefined) return false;
+  const limit = current.limit ?? previous.limit;
+  const threshold =
+    limit !== undefined && limit > 0
+      ? Math.max(limit * 0.02, 1e-6)
+      : Math.max(Math.abs(previousValue) * 0.02, 1e-6);
+  return currentValue > previousValue + threshold;
+}
+
+function resetAtSlidWithCapture(previous: HistoryPoint, point: HistoryPoint): boolean {
+  const previousReset = previous.metric.resetAt;
+  const nextReset = point.metric.resetAt;
+  if (previousReset === undefined || nextReset === undefined) return false;
+  const captureDelta = point.capturedAt - previous.capturedAt;
+  const resetDelta = nextReset - previousReset;
+  const slack = Math.max(120, Math.abs(captureDelta) * 0.25);
+  return Math.abs(resetDelta - captureDelta) <= slack;
+}
+
+function isQuotaWindowReset(previous: HistoryPoint, point: HistoryPoint): boolean {
+  if (!hasRemainingSemantics(previous.metric) || !hasRemainingSemantics(point.metric)) {
+    return false;
+  }
+  if (!quotaRefilled(previous.metric, point.metric)) return false;
+
+  const previousStart = previous.metric.periodStart;
+  const nextStart = point.metric.periodStart;
+  if (previousStart !== undefined && nextStart !== undefined && previousStart === nextStart) {
+    return false;
+  }
+
+  const previousReset = previous.metric.resetAt;
+  const nextReset = point.metric.resetAt;
+  if (previousReset !== undefined && nextReset !== undefined) {
+    const resetDrift = Math.abs(nextReset - previousReset);
+    if (resetDrift === 0) return false;
+    if (resetDrift <= 120 && point.capturedAt < previousReset) return false;
+  }
+  if (previousReset !== undefined && point.capturedAt >= previousReset) return true;
+  if (previousStart !== undefined && nextStart !== undefined && previousStart !== nextStart) {
+    return true;
+  }
+  if (previousReset !== undefined && nextReset !== undefined && previousReset !== nextReset) {
+    return !resetAtSlidWithCapture(previous, point);
+  }
+  return false;
+}
+
 export function toChartData(
   points: HistoryPoint[],
   delta: boolean,
@@ -79,12 +130,7 @@ export function toChartData(
   for (const point of points) {
     const currentValue = chartValue(point.metric);
     if (currentValue === undefined) continue;
-    const periodChanged =
-      previous &&
-      hasRemainingSemantics(point.metric) &&
-      previous.metric.resetAt !== undefined &&
-      point.metric.resetAt !== previous.metric.resetAt;
-    if (periodChanged) {
+    if (previous && isQuotaWindowReset(previous, point)) {
       rows.push({
         time: point.capturedAt - 1,
         value: null,
