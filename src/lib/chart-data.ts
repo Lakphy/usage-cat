@@ -15,8 +15,83 @@ export type MultiSeriesChartPoint = {
 
 export const CHART_COLOR_COUNT = 8;
 
+export type ChartScale = "percent" | "number";
+export type ChartAxisId = "shared" | ChartScale;
+
 export function metricChartColor(index: number): string {
   return `var(--chart-${(index % CHART_COLOR_COUNT) + 1})`;
+}
+
+/**
+ * Scale of the number actually plotted by `chartValue`.
+ * `unit: "%"` is a percentage even when remaining is present.
+ * Absolute quotas also store `percentage`, but the line uses remaining or used.
+ */
+export function chartScale(metric: UsageMetric): ChartScale {
+  if (metric.unit === "%") return "percent";
+  if (metric.kind === "balance") return "number";
+  if (
+    hasRemainingSemantics(metric) &&
+    (metric.remaining !== undefined || (metric.limit !== undefined && metric.used !== undefined))
+  ) {
+    return "number";
+  }
+  return metric.percentage !== undefined ? "percent" : "number";
+}
+
+export function usesDualChartAxis(metrics: UsageMetric[]): boolean {
+  let hasPercent = false;
+  let hasNumber = false;
+  for (const metric of metrics) {
+    if (chartScale(metric) === "percent") hasPercent = true;
+    else hasNumber = true;
+  }
+  return hasPercent && hasNumber;
+}
+
+export function chartAxisId(metric: UsageMetric, dual: boolean): ChartAxisId {
+  return dual ? chartScale(metric) : "shared";
+}
+
+export function chartNumberUnit(metrics: UsageMetric[]): string | undefined {
+  const units = new Set(
+    metrics.filter((metric) => chartScale(metric) === "number").map((metric) => metric.unit),
+  );
+  return units.size === 1 ? [...units][0] : undefined;
+}
+
+function trimNumber(value: number, digits: number): string {
+  if (digits <= 0) return String(Math.round(value));
+  const factor = 10 ** digits;
+  const rounded = Math.round(value * factor) / factor;
+  return rounded.toFixed(digits).replace(/\.?0+$/, "");
+}
+
+function compactNumber(value: number, locale: Locale): string {
+  const abs = Math.abs(value);
+  const sign = value < 0 ? "-" : "";
+  if (locale === "zh-CN" && abs >= 10_000) {
+    if (abs >= 100_000_000) return `${sign}${trimNumber(abs / 100_000_000, 2)}亿`;
+    return `${sign}${trimNumber(abs / 10_000, 2)}万`;
+  }
+  if (locale !== "zh-CN" && abs >= 10_000) {
+    if (abs >= 1_000_000_000) return `${sign}${trimNumber(abs / 1_000_000_000, 2)}b`;
+    if (abs >= 1_000_000) return `${sign}${trimNumber(abs / 1_000_000, 2)}m`;
+    return `${sign}${trimNumber(abs / 1_000, 2)}k`;
+  }
+  return new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value);
+}
+
+export function formatChartTick(value: number, scale: ChartScale, locale: Locale): string {
+  if (!Number.isFinite(value)) return "";
+  if (scale === "percent") return `${trimNumber(value, 0)}%`;
+  return compactNumber(value, locale);
+}
+
+export function formatChartTooltipValue(value: number, scale: ChartScale, locale: Locale): string {
+  if (!Number.isFinite(value)) return "";
+  if (scale === "percent") return `${trimNumber(value, 2)}%`;
+  return new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value);
 }
 
 function interpolatedValue(points: ChartPoint[], time: number): number | undefined {

@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { mergeChartSeries, metricChartColor, toChartData } from "@/lib/chart-data";
+import {
+  chartAxisId,
+  chartNumberUnit,
+  chartScale,
+  formatChartTick,
+  formatChartTooltipValue,
+  mergeChartSeries,
+  metricChartColor,
+  toChartData,
+  usesDualChartAxis,
+} from "@/lib/chart-data";
 import { metricSummary } from "@/lib/format";
 import type { HistoryPoint, UsageMetric } from "@/shared/usage";
 
@@ -187,6 +197,76 @@ describe("折线图取数", () => {
       { time: 130, label: "b", weekly: 20, monthly: 380 },
       { time: 160, label: "c", monthly: 360 },
     ]);
+  });
+
+  it("百分比和绝对数值使用不同纵轴，带 percentage 的绝对额度仍按数字绘制", () => {
+    const percent = metric({
+      key: "codex-primary",
+      unit: "%",
+      used: 88,
+      limit: 100,
+      remaining: 12,
+      percentage: 88,
+    });
+    const credits = metric({
+      key: "codex-credits",
+      kind: "balance",
+      unit: "credits",
+      used: 62_500,
+      value: 62_500,
+    });
+    const flow = metric({
+      key: "zenmux-7d",
+      unit: "flow",
+      used: 6.47,
+      limit: 213,
+      remaining: 206.53,
+      percentage: 3.04,
+    });
+    const cap = metric({
+      key: "zenmux-monthly-cap",
+      kind: "instant",
+      unit: "flow",
+      used: 914,
+      value: 914,
+    });
+    const cents = metric({
+      kind: "billing_counter",
+      unit: "USD cents",
+      used: 0,
+      limit: 0,
+      remaining: 0,
+    });
+
+    expect(chartScale(percent)).toBe("percent");
+    expect(chartScale(credits)).toBe("number");
+    expect(chartScale(flow)).toBe("number");
+    expect(chartScale(cents)).toBe("number");
+    expect(
+      chartScale(metric({ kind: "quota_window", unit: "ratio", used: undefined, percentage: 40 })),
+    ).toBe("percent");
+    expect(usesDualChartAxis([percent, credits])).toBe(true);
+    expect(usesDualChartAxis([percent])).toBe(false);
+    expect(usesDualChartAxis([flow, cap, credits])).toBe(false);
+    expect(chartAxisId(percent, true)).toBe("percent");
+    expect(chartAxisId(credits, true)).toBe("number");
+    expect(chartAxisId(percent, false)).toBe("shared");
+    expect(chartNumberUnit([credits])).toBe("credits");
+    expect(chartNumberUnit([flow, cents])).toBeUndefined();
+  });
+
+  it("纵轴刻度把百分比和紧凑数字分开格式化", () => {
+    expect(formatChartTick(100, "percent", "en")).toBe("100%");
+    expect(formatChartTick(12.4, "percent", "zh-CN")).toBe("12%");
+    expect(formatChartTooltipValue(12.26, "percent", "en")).toBe("12.26%");
+    expect(formatChartTooltipValue(98.757, "percent", "zh-CN")).toBe("98.76%");
+    expect(formatChartTick(62_500, "number", "en")).toBe("62.5k");
+    expect(formatChartTick(62_500, "number", "zh-CN")).toBe("6.25万");
+    expect(formatChartTick(20_000, "number", "en")).toBe("20k");
+    expect(formatChartTick(250, "number", "en")).toBe("250");
+    expect(formatChartTooltipValue(62_500, "number", "en")).toBe("62,500");
+    expect(formatChartTooltipValue(206.53, "number", "zh-CN")).toBe("206.53");
+    expect(formatChartTick(Number.NaN, "percent", "en")).toBe("");
   });
 
   it("额度颜色按稳定序号循环分配", () => {

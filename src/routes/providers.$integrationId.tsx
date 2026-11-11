@@ -2,13 +2,11 @@ import { ArrowLeft, ClockCounterClockwise } from "@phosphor-icons/react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { ProviderMark } from "@/components/provider-mark";
 import { StatusBadge } from "@/components/status-badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -19,8 +17,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UsageHistoryChart } from "@/components/usage-history-chart";
 import { apiClient } from "@/lib/api";
-import { mergeChartSeries, metricChartColor, toChartData } from "@/lib/chart-data";
+import {
+  mergeChartSeries,
+  metricChartColor,
+  toChartData,
+  usesDualChartAxis,
+} from "@/lib/chart-data";
 import {
   formatTime,
   hasRemainingSemantics,
@@ -110,6 +114,7 @@ function ProviderDetailPage() {
   );
   const historyPending = visibleHistories.some((item) => item?.isPending);
   const historyError = visibleHistories.find((item) => item?.isError);
+  const dualAxis = usesDualChartAxis(visibleMetrics);
 
   if (dashboard.isLoading) return <Skeleton className="h-[32rem]" />;
   if (dashboard.isError) {
@@ -171,10 +176,15 @@ function ProviderDetailPage() {
         <CardHeader>
           <CardTitle>{t("Usage history", "用量历史")}</CardTitle>
           <CardDescription>
-            {t(
-              "All selected quotas share one chart. Colors distinguish each type; remaining-quota series step straight up when a window refills.",
-              "所选额度叠加在同一张折线图中，颜色区分类型。剩余额度在窗口回补时会竖线拉回。",
-            )}
+            {dualAxis
+              ? t(
+                  "Percentages use the left axis and absolute amounts use the right axis. Colors distinguish each series; remaining quotas step straight up when a window refills.",
+                  "百分比使用左侧纵轴，绝对数值使用右侧纵轴。颜色区分各条曲线；剩余额度在窗口回补时会竖线拉回。",
+                )
+              : t(
+                  "All selected quotas share one chart. Colors distinguish each type; remaining-quota series step straight up when a window refills.",
+                  "所选额度叠加在同一张折线图中，颜色区分类型。剩余额度在窗口回补时会竖线拉回。",
+                )}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -253,41 +263,7 @@ function ProviderDetailPage() {
               </AlertDescription>
             </Alert>
           ) : chartData.length ? (
-            <ChartContainer config={chartConfig} className="h-80 w-full aspect-auto">
-              <LineChart data={chartData} margin={{ left: 8, right: 8, top: 12 }}>
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="time"
-                  type="number"
-                  scale="time"
-                  domain={["dataMin", "dataMax"]}
-                  tickLine={false}
-                  axisLine={false}
-                  minTickGap={42}
-                  tickFormatter={(value) => formatTime(Number(value), locale)}
-                />
-                <YAxis tickLine={false} axisLine={false} width={52} />
-                <ChartTooltip
-                  content={
-                    <ChartTooltipContent
-                      labelFormatter={(_, payload) => payload[0]?.payload?.label ?? ""}
-                    />
-                  }
-                />
-                {visibleMetrics.map((metric) => (
-                  <Line
-                    key={metric.key}
-                    dataKey={metric.key}
-                    name={metric.key}
-                    type="linear"
-                    stroke={`var(--color-${metric.key})`}
-                    strokeWidth={2}
-                    dot={false}
-                    connectNulls={false}
-                  />
-                ))}
-              </LineChart>
-            </ChartContainer>
+            <UsageHistoryChart data={chartData} metrics={visibleMetrics} config={chartConfig} />
           ) : (
             <div className="grid h-80 place-items-center border border-dashed text-xs text-muted-foreground">
               {t("No snapshots in this time range", "这个时间范围内还没有快照")}
