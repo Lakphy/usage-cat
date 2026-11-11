@@ -266,15 +266,15 @@ function ZenMuxGuide({ compact }: { compact?: boolean }) {
       summary={
         locale === "en" ? (
           <>
-            The subscription quota endpoint only accepts a personal{" "}
-            <InlineCode>sk-mg-v1-…</InlineCode> management key.{" "}
+            The subscription quota endpoint accepts a personal <InlineCode>sk-mgmt-…</InlineCode>{" "}
+            management key.{" "}
             <ExternalLink href="https://zenmux.ai/platform/management">
               Open ZenMux Management
             </ExternalLink>
           </>
         ) : (
           <>
-            订阅额度接口只接受个人账号的 <InlineCode>sk-mg-v1-…</InlineCode> 管理 Key。{" "}
+            订阅额度接口接受个人账号的 <InlineCode>sk-mgmt-…</InlineCode> 管理 Key。{" "}
             <ExternalLink href="https://zenmux.ai/platform/management">
               打开 ZenMux Management
             </ExternalLink>
@@ -298,11 +298,11 @@ function ZenMuxGuide({ compact }: { compact?: boolean }) {
         <li>
           {locale === "en" ? (
             <>
-              Copy the key beginning with <InlineCode>sk-mg-v1-</InlineCode> and paste it below.
+              Copy the key beginning with <InlineCode>sk-mgmt-</InlineCode> and paste it below.
             </>
           ) : (
             <>
-              复制以 <InlineCode>sk-mg-v1-</InlineCode> 开头的 Key，粘贴到下方。
+              复制以 <InlineCode>sk-mgmt-</InlineCode> 开头的 Key，粘贴到下方。
             </>
           )}
         </li>
@@ -310,14 +310,20 @@ function ZenMuxGuide({ compact }: { compact?: boolean }) {
       <p className="mt-2 text-[10px] leading-5 text-muted-foreground">
         {locale === "en" ? (
           <>
-            <InlineCode>sk-ss-v1-…</InlineCode> is a subscription inference key and{" "}
-            <InlineCode>sk-ai-v1-…</InlineCode> is a PAYG inference key. Neither can query account
-            subscription quotas.
+            Keys issued before the November 10, 2026 rotation begin with{" "}
+            <InlineCode>sk-mg-v1-…</InlineCode> and can still be pasted.{" "}
+            <InlineCode>sk-subs-…</InlineCode> and <InlineCode>sk-ss-v1-…</InlineCode> are
+            subscription inference keys; <InlineCode>sk-payg-…</InlineCode> and{" "}
+            <InlineCode>sk-ai-v1-…</InlineCode> are PAYG inference keys. None of those can query
+            account subscription quotas.
           </>
         ) : (
           <>
-            <InlineCode>sk-ss-v1-…</InlineCode> 是订阅模型调用 Key，
-            <InlineCode>sk-ai-v1-…</InlineCode> 是 PAYG 模型调用 Key；它们都不能查询账户订阅额度。
+            2026-11-10 之前签发的 <InlineCode>sk-mg-v1-…</InlineCode> 仍可粘贴。
+            <InlineCode>sk-subs-…</InlineCode> 和 <InlineCode>sk-ss-v1-…</InlineCode> 是订阅模型调用
+            Key，
+            <InlineCode>sk-payg-…</InlineCode> 和 <InlineCode>sk-ai-v1-…</InlineCode> 是 PAYG
+            模型调用 Key；它们都不能查询账户订阅额度。
           </>
         )}
       </p>

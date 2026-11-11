@@ -112,18 +112,24 @@ export function normalizeCredential(
     return { provider, apiKey: credential };
   }
   if (provider === "zenmux") {
-    if (credential.startsWith("sk-ss-v1-") || credential.startsWith("sk-ai-v1-")) {
+    const inferenceKind =
+      credential.startsWith("sk-subs-") || credential.startsWith("sk-ss-v1-")
+        ? "订阅推理 Key"
+        : credential.startsWith("sk-payg-") || credential.startsWith("sk-ai-v1-")
+          ? "PAYG 推理 Key"
+          : undefined;
+    if (inferenceKind) {
       throw new AdapterError(
         "INVALID_CREDENTIAL",
-        `${credential.startsWith("sk-ss-v1-") ? "sk-ss-v1- 订阅推理 Key" : "sk-ai-v1- PAYG 推理 Key"} 不能查询账户用量；请在 ZenMux Management 页面创建 sk-mg-v1- 管理 Key`,
+        `${inferenceKind} 不能查询账户用量；请在 ZenMux Management 页面创建 sk-mgmt- 管理 Key`,
         false,
         true,
       );
     }
-    if (!credential.startsWith("sk-mg-v1-"))
+    if (!credential.startsWith("sk-mgmt-") && !credential.startsWith("sk-mg-v1-"))
       throw new AdapterError(
         "INVALID_CREDENTIAL",
-        "ZenMux 用量查询需要以 sk-mg-v1- 开头的 Management API Key",
+        "ZenMux 用量查询需要以 sk-mgmt- 开头的 Management API Key",
         false,
         true,
       );

@@ -92,14 +92,14 @@ pnpm run deploy
 | Codex | 独立 `CODEX_HOME/auth.json` | ChatGPT Codex usage + OAuth refresh | Beta / 内部接口 |
 | Cursor | `crsr_...` User API Key | Dashboard Connect RPC | Beta / 内部接口 |
 | Grok | 独立 `GROK_HOME/auth.json` | Grok CLI billing/settings + OIDC refresh | Beta / 内部接口 |
-| ZenMux | `sk-mg-v1-...` Management API Key | `/api/v1/management/subscription/detail` | 官方接口 |
+| ZenMux | `sk-mgmt-...` Management API Key | `/api/v1/management/subscription/detail` | 官方接口 |
 | Kimi | Kimi Code 或开放平台 API Key，并显式选择产品与区域 | Kimi Code `/coding/v1/usages`；开放平台 `/v1/users/me/balance` | 开放平台余额为官方接口；Code 用量为 Beta |
 
 Codex 和 Grok 建议在临时、隔离的配置目录中完成 CLI 登录，再上传生成的 `auth.json`。后台只提取访问令牌、刷新令牌、账号/客户端标识和过期时间，不保存原文件的其他内容。凭据由 AES-256-GCM 加密，AAD 绑定监控项 ID、平台和密钥版本。
 
 所有上游主机都固化在代码中，后台不能配置自定义 Base URL，以避免 SSRF。任何同步错误都只保存经过裁剪的错误码和消息，不记录令牌或上游完整响应。
 
-ZenMux 的 `sk-ss-v1-...` 是订阅模型调用 Key，`sk-ai-v1-...` 是 PAYG 模型调用 Key，二者都不能访问账户用量接口。监控订阅额度需要在 ZenMux Console 的 Management 页面另行创建 `sk-mg-v1-...` Management API Key。
+ZenMux 的 `sk-subs-...`（旧格式 `sk-ss-v1-...`）是订阅模型调用 Key，`sk-payg-...`（旧格式 `sk-ai-v1-...`）是 PAYG 模型调用 Key，二者都不能访问账户用量接口。监控订阅额度需要在 ZenMux Console 的 Management 页面另行创建 `sk-mgmt-...` Management API Key。2026-11-10 之前签发的 `sk-mg-v1-...` 仍可录入。
 
 Kimi 必须选择与 Key 来源一致的产品和区域，系统不会把 Key 自动发送到多个区域探测：
 

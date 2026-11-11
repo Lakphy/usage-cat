@@ -114,6 +114,16 @@ describe("凭据导入", () => {
     expect(() => normalizeCredential("zenmux", "sk-ss-v1-subscription")).toThrow(
       "订阅推理 Key 不能查询账户用量",
     );
+    expect(() => normalizeCredential("zenmux", "sk-subs-subscription")).toThrow(
+      "订阅推理 Key 不能查询账户用量",
+    );
+    expect(() => normalizeCredential("zenmux", "sk-payg-balance")).toThrow(
+      "PAYG 推理 Key 不能查询账户用量",
+    );
+    expect(normalizeCredential("zenmux", "sk-mgmt-management")).toEqual({
+      provider: "zenmux",
+      apiKey: "sk-mgmt-management",
+    });
     expect(normalizeCredential("zenmux", "sk-mg-v1-management")).toEqual({
       provider: "zenmux",
       apiKey: "sk-mg-v1-management",

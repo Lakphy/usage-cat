@@ -13,7 +13,7 @@ Codex、Cursor、Grok、Kimi Code 使用的不是稳定公共 API，界面标 Be
 | `codex` | 隔离目录的 `auth.json` | 15 分钟 | 是 | `https://chatgpt.com/backend-api/wham/usage` |
 | `cursor` | `crsr_…` User API Key | 60 分钟 | 是 | `https://api2.cursor.sh` Dashboard Connect RPC |
 | `grok` | 隔离目录的 `auth.json` | 60 分钟 | 是 | `https://cli-chat-proxy.grok.com/v1/billing` |
-| `zenmux` | `sk-mg-v1-…` Management Key | 30 分钟 | 否 | `https://zenmux.ai/api/v1/management/subscription/detail` |
+| `zenmux` | `sk-mgmt-…` Management Key | 30 分钟 | 否 | `https://zenmux.ai/api/v1/management/subscription/detail` |
 | `kimi` | API Key + 显式 `credentialMode` | 15 分钟 | Code 为是，开放平台余额为否 | 见下方 Kimi |
 
 `adapterVersion` 写在每条快照的 `source.adapterVersion`（例如 `codex/3`、`cursor/4`、`grok/3`、`zenmux/2`、`kimi/5`）。改解析逻辑时应升版本，并先换 `tests/fixtures/` 再改代码。
@@ -85,16 +85,16 @@ mkdir -p ~/.usage-cat-grok && GROK_HOME="$HOME/.usage-cat-grok" grok login
 
 ## ZenMux Subscription
 
-只要 Management API Key，前缀必须是 `sk-mg-v1-`。
+只要 Management API Key。当前前缀是 `sk-mgmt-`。2026-11-10 之前签发的 `sk-mg-v1-` 仍可录入。新 Key 总长度约 164 字符，旧 Key 约 73 字符。
 
 1. 登录 [ZenMux](https://zenmux.ai/platform/management)，确认头像菜单是个人账号
 2. Management 页面创建 Management API Key
-3. 粘贴 `sk-mg-v1-…`
+3. 粘贴 `sk-mgmt-…`
 
 会被拒绝：
 
-- `sk-ss-v1-…` 订阅推理 Key
-- `sk-ai-v1-…` PAYG 推理 Key
+- `sk-subs-…` / `sk-ss-v1-…` 订阅推理 Key
+- `sk-payg-…` / `sk-ai-v1-…` PAYG 推理 Key
 
 官方 `usage_percentage` 是 0–1，适配器乘 100。指标：`zenmux-5h`、`zenmux-7d`、`zenmux-monthly-cap`（月度上限以 `instant` 记录，不是用量曲线）。
 

@@ -340,7 +340,7 @@ function credentialLabel(
   t: (english: string, chinese: string) => string,
 ): string {
   if (provider === "zenmux") {
-    return t("Management API Key (sk-mg-v1-…)", "Management API Key（sk-mg-v1-…）");
+    return t("Management API Key (sk-mgmt-…)", "Management API Key（sk-mgmt-…）");
   }
   return providerMeta[provider].credentialLabel;
 }
@@ -586,7 +586,7 @@ function CreateIntegrationCard({
                       provider === "cursor"
                         ? "crsr_…"
                         : provider === "zenmux"
-                          ? "sk-mg-v1-…"
+                          ? "sk-mgmt-…"
                           : kimiCredentialMode.startsWith("code_")
                             ? "sk-kimi-…"
                             : t("Platform sk-… key", "开放平台 sk-… Key")

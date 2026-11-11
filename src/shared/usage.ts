@@ -46,7 +46,7 @@ export const providerMeta: Record<
   },
   zenmux: {
     name: "ZenMux Subscription",
-    credentialLabel: "Management API Key（sk-mg-v1-…）",
+    credentialLabel: "Management API Key（sk-mgmt-…）",
     credentialKind: "api-key",
     beta: false,
     defaultIntervalMinutes: 30,

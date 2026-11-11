@@ -19,7 +19,7 @@ describe("凭据配置说明", () => {
     ["codex", "如何取得 Codex auth.json", "~/.usage-cat-codex/auth.json"],
     ["cursor", "如何取得 Cursor User API Key", "crsr_"],
     ["grok", "如何取得 Grok auth.json", "~/.usage-cat-grok/auth.json"],
-    ["zenmux", "如何取得 ZenMux Management API Key", "sk-mg-v1-"],
+    ["zenmux", "如何取得 ZenMux Management API Key", "sk-mgmt-"],
   ] as const)("%s 显示凭据来源和关键格式", (provider, title, expectedText) => {
     render(guideNode(provider as ProviderId));
     expect(screen.getByText(title)).toBeInTheDocument();
